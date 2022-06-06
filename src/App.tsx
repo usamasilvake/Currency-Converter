@@ -3,6 +3,7 @@ import Axios from 'axios';
 import './App.scss';
 import Dropdown from './dropdown/Dropdown';
 import { CurrencyInfoInterface, CurrencyInterface } from './App.interface';
+import Result from './result/Result';
 
 const App = () => {
 	const [info, setInfo] = useState<CurrencyInfoInterface>({});
@@ -13,16 +14,15 @@ const App = () => {
 	const [output, setOutput] = useState<number>(198);
 
 	useEffect(() => {
-		const fetchCurrencies = () => {
-			const get = async <T,>(url: string): Promise<T> => {
+		const fetchCurrencies = async () => {
+			const httpGet = async <T,>(url: string): Promise<T> => {
 				const api = await Axios.get(url);
 				return api.data as T;
 			}
-			get<CurrencyInterface>(`https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/${from}.json`).then
-				((res) => {
-					setInfo(res[from]);
-					console.log(res)
-				})
+			// fetch api
+			const response = await httpGet<CurrencyInterface>
+				(`https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/${from}.json`);
+			setInfo(response[from]);
 		}
 		fetchCurrencies();
 	}, [from]);
@@ -53,25 +53,19 @@ const App = () => {
 					</div>
 					<div className="cu-options">
 						<div className="cu-option">
-							<h3>From</h3>
-							<Dropdown options={options}
+							<Dropdown id="dropdown-from" label="From" options={options}
 								onChange={(e) => { setFrom(e) }}
 								initial={from} />
 						</div>
 						<div onClick={flip}>flip</div>
 						<div className="cu-option">
-							<h3>To</h3>
-							<Dropdown options={options}
+							<Dropdown id="dropdown-to" label="To" options={options}
 								onChange={(e) => { setTo(e) }}
 								initial={to} />
 						</div>
 					</div>
 				</div>
-				<div className="cu-result">
-					<h2>Converted Amount:</h2>
-					<p>{input + " " + from.toUpperCase() + " = " + output.toFixed(2) + " " + to.toUpperCase()}</p>
-
-				</div>
+				<Result input={input} from={from} output={output} to={to} />
 			</div>
 		</div>
 	);
